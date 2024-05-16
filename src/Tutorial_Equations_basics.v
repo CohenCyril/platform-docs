@@ -593,7 +593,7 @@ Definition filter_length {A} (l : list A) (p : A -> bool)
            : length (filter l p) <= length l.
 Proof.
 Admitted.
-
+(*
 Equations find_dictionary {A B} (eq : A -> A -> bool) (key : A)
           (l : list (A * B)) : option B :=
 find_dictionary eq key [] := to_fill;
@@ -676,3 +676,4 @@ Proof.
   all: cbn; intros; simp rev app in *.
   reflexivity.
 Qed.
+*)

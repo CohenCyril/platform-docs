@@ -1,0 +1,8 @@
+*~
+*.aux
+*.html
+*.vo
+*.vok
+*.vos
+*.css
+node_modules/
