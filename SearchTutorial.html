@@ -1,0 +1,979 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <script src="./node_modules/jscoq/dist/frontend/index.js" type="module"></script>
+<script src="./jscoq-agent.js" type="module"></script>
+<link href="./node_modules/jscoq/dist/frontend/index.css" rel="stylesheet" type="text/css" />
+<link href="./node_modules/jscoq/frontend/classic/css/jscoqdoc.css" rel="stylesheet" type="text/css" />
+  <title>SearchTutorial.v</title>
+</head>
+<body>
+<div id="page">
+<div id="header"></div>
+<div id="main" class="jscoqdoc">
+<div class="code">
+</div>
+
+<div class="doc">
+<a id="lab1"></a><h1 class="section">Search tutorial for Coq</h1>
+
+
+<div class="paragraph"> </div>
+
+<a id="lab2"></a><h3 class="section">Summary</h3>
+
+
+<div class="paragraph"> </div>
+
+	This tutorial is about the powerful <span class="inlinecode"><span class="id" title="keyword">Search</span></span> vernacular command in Coq.
+	The <span class="inlinecode"><span class="id" title="keyword">Search</span></span> command prints names and types of constants in the local or
+	global context satisfying a number of criteria.
+
+<div class="paragraph"> </div>
+
+<a id="lab3"></a><h3 class="section">Table of content</h3>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> 1. Searching for lemmas
+<ul class="doclist">
+<li> 1.1 Basic <span class="inlinecode"><span class="id" title="keyword">Search</span></span> by name and type
+<ul class="doclist">
+<li> 1.1.1 Exercise: find parity results on <span class="inlinecode"><span class="id" title="var">nat</span></span>
+
+</li>
+</ul>
+
+</li>
+<li> 1.2 Search and notations
+<ul class="doclist">
+<li> 1.2.1 Exercise: sum and products on <span class="inlinecode"><span class="id" title="var">nat</span></span> and <span class="inlinecode"><span class="id" title="keyword">Type</span></span>
+
+</li>
+</ul>
+
+</li>
+<li> 1.3 Searching using metavariables
+<ul class="doclist">
+<li> 1.3.1 Exercise: find lemmas with metavariables
+
+</li>
+</ul>
+
+</li>
+<li> 1.4 Filtering on hypotheses (parameters) or conclusions (return type)
+<ul class="doclist">
+<li> 1.4.1 Exercise: finding divisibility results
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+</li>
+<li> 2. Advanced <span class="inlinecode"><span class="id" title="keyword">Search</span></span> options
+<ul class="doclist">
+<li> 2.1 Disambiguating strings in Search queries
+
+</li>
+<li> 2.2 Filtering results by logical kind and disjunctions of criteria.
+
+</li>
+<li> 2.3 Searching inside or outside a specific module
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+<a id="lab4"></a><h3 class="section">Prerequisites</h3>
+
+
+<div class="paragraph"> </div>
+
+    Needed:
+<ul class="doclist">
+<li> For the first part, it suffices to have some basic experience of Coq: the
+      user should know intuitively what is a Coq function and a Coq lemma or
+      theorem. Scope notations are mentioned briefly but this should not be too
+      much of an issue.
+
+</li>
+<li> For the 2.3 part, some basic experience of Coq modules should be enough.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    Installation:
+    This <span class="inlinecode"><span class="id" title="keyword">Search</span></span> tutorial should work for Coq V8.16 or later.
+
+<div class="paragraph"> </div>
+
+<a id="lab5"></a><h3 class="section">Warning</h3>
+
+
+<div class="paragraph"> </div>
+
+    When viewed in a web browser with jsCoq, some <span class="inlinecode"><span class="id" title="keyword">Search</span></span> queries are slow
+    (about 10 seconds).
+
+<div class="paragraph"> </div>
+
+ In this tutorial, we are going to search for lemmas, mostly about natural
+    numbers.
+
+<div class="paragraph"> </div>
+
+    We already have all lemmas and definitions from the prelude (<span class="inlinecode"><span class="id" title="var">Coq.Init</span></span>),
+    and we require the library file <span class="inlinecode"><span class="id" title="var">Coq.Arith.PeanoNat</span></span> which adds hundreds
+    of new constants. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#"><span class="id" title="library">PeanoNat</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab6"></a><h2 class="section">1. Searching for lemmas</h2>
+
+<div class="paragraph"> </div>
+
+<a id="lab7"></a><h3 class="section">1.1 Basic <span class="inlinecode"><span class="id" title="keyword">Search</span></span> by name and type</h3>
+
+<div class="paragraph"> </div>
+
+ In its most basic form, one searches for lemmas or definitions containing
+<ul class="doclist">
+<li> a given constant, eg <span class="inlinecode"><span class="id" title="var">Nat.add</span></span>, or <span class="inlinecode"><span class="id" title="var">nat</span></span>
+
+</li>
+<li> a given string to be part of the identifier (the name)
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ Search all lemmas or operations where the type <span class="inlinecode"><span class="id" title="var">nat</span></span> occurs: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Search all lemmas or operations where <span class="inlinecode"><span class="id" title="var">Nat.add</span></span> occurs: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Search all lemmas or operations whose name contains "add": 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "add".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+In practice, we often want to search for lemmas satisfying multiple
+    criteria, e.g. search for all lemmas whose name contain "add" <i>and</i> whose
+    type contains <span class="inlinecode"><span class="id" title="var">Nat.mul</span></span>.
+
+<div class="paragraph"> </div>
+
+    To do so, it suffices to give these criteria to <span class="inlinecode"><span class="id" title="keyword">Search</span></span>, it acts as a
+    conjunction: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "add" <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.mul"><span class="id" title="definition">Nat.mul</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can give as many criteria as we want. Below we search for constants
+    which satisfy:
+<ul class="doclist">
+<li> has "mul" in the name and
+
+</li>
+<li> has <span class="inlinecode"><span class="id" title="var">Nat.add</span></span> in the type and
+
+</li>
+<li> has <span class="inlinecode"><span class="id" title="var">Nat.odd</span></span> in the type 
+
+</li>
+</ul>
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a> "mul" <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.odd"><span class="id" title="definition">Nat.odd</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can also <i>filter out</i> results satisfying a criterion with by prepending
+    it with a minus <span class="inlinecode">-</span> symbol.
+    Say we're looking for a lemma stating that the sum of an even number and an
+    odd number is odd: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.odd"><span class="id" title="definition">Nat.odd</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This is already good, but we're not interested in lemmas whose name
+    contain "mul", so we can filter them out to get clearer results by adding
+    <span class="inlinecode">-&quot;<span class="id" title="var">mul</span>&quot;</span>: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.odd"><span class="id" title="definition">Nat.odd</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a> -"mul".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab8"></a><h4 class="section">1.1.1 Exercise: find parity results on <span class="inlinecode"><span class="id" title="var">nat</span></span></h4>
+
+<div class="paragraph"> </div>
+
+ We're interested in lemmas about parity in <span class="inlinecode"><span class="id" title="var">nat</span></span>.
+    There are two complementary definitions of being even and being odd:
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" title="var">Nat.Odd</span></span> and <span class="inlinecode"><span class="id" title="var">Nat.Even</span></span> (in <span class="inlinecode"><span class="id" title="keyword">Prop</span></span>) are the usual existentially
+      quantified definitions;
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="var">Nat.odd</span></span> and <span class="inlinecode"><span class="id" title="var">Nat.even</span></span> (in <span class="inlinecode"><span class="id" title="var">bool</span></span>) are functions which compute. 
+
+</li>
+</ul>
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="var">Nat.Odd</span>.<br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="var">Nat.Even</span>.<br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="var">Nat.odd</span>.<br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="var">Nat.even</span>.<br/>
+<span class="id" title="keyword">Compute</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.even"><span class="id" title="definition">Nat.even</span></a> 42.<br/>
+<span class="id" title="keyword">Compute</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.odd"><span class="id" title="definition">Nat.odd</span></a> 42.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Find all lemmas, with a precise enough search, which
+    1. state an equivalence between being <span class="inlinecode"><span class="id" title="var">Even</span></span> and being <span class="inlinecode"><span class="id" title="var">even</span></span>;
+    2. state that the successor (function <span class="inlinecode"><span class="id" title="var">S</span></span>) of an <span class="inlinecode"><span class="id" title="var">even</span></span> number is <span class="inlinecode"><span class="id" title="var">odd</span></span>;
+    3. state that the product of an <span class="inlinecode"><span class="id" title="var">Even</span></span> number by any other number is <span class="inlinecode"><span class="id" title="var">Even</span></span>;
+    4. state that a number is <span class="inlinecode"><span class="id" title="var">Even</span></span> or (predicate <span class="inlinecode"><span class="id" title="var">or</span></span>) <span class="inlinecode"><span class="id" title="var">Odd</span></span> and
+    5. state that it is <span class="inlinecode"><span class="id" title="var">true</span></span> that a number is <span class="inlinecode"><span class="id" title="var">even</span></span> or (boolean operation
+       <span class="inlinecode"><span class="id" title="var">orb</span></span>) <span class="inlinecode"><span class="id" title="var">odd</span></span>.
+
+</div>
+<div class="code">
+
+<br/>
+ <span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.Even"><span class="id" title="definition">Nat.Even</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.even"><span class="id" title="definition">Nat.even</span></a> -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a>.<br/>
+ <span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.even"><span class="id" title="definition">Nat.even</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.odd"><span class="id" title="definition">Nat.odd</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a>.<br/>
+ <span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.mul"><span class="id" title="definition">Nat.mul</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.Even"><span class="id" title="definition">Nat.Even</span></a> -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a> -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.Odd"><span class="id" title="definition">Nat.Odd</span></a>.<br/>
+ <span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#or"><span class="id" title="inductive">or</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.Even"><span class="id" title="definition">Nat.Even</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.Odd"><span class="id" title="definition">Nat.Odd</span></a> -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a> -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.mul"><span class="id" title="definition">Nat.mul</span></a>.<br/>
+ <span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#orb"><span class="id" title="definition">orb</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.even"><span class="id" title="definition">Nat.even</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.odd"><span class="id" title="definition">Nat.odd</span></a> -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a> -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.mul"><span class="id" title="definition">Nat.mul</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab9"></a><h3 class="section">1.2 Search and notations</h3>
+
+<div class="paragraph"> </div>
+
+ Previously, we have been using the names of the operations to <span class="inlinecode"><span class="id" title="keyword">Search</span></span> for.
+    It may be confusing that such names do not even appear in the output. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.mul"><span class="id" title="definition">Nat.mul</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.div"><span class="id" title="definition">Nat.div</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Indeed, Coq uses notations to display such results, and these are exactly
+    what the user may expect. In fact, we often forget the names of operations
+    such as <span class="inlinecode"><span class="id" title="var">Nat.add</span></span>.
+
+<div class="paragraph"> </div>
+
+    We can search using notations in the following way: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span>) (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>) (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#2e0d8202c5a48097752d760d3a1db6a7"><span class="id" title="notation">/</span></a> <span class="id" title="var">_</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Notice the wildcards <span class="inlinecode"><span class="id" title="var">_</span></span> around the operators. We call <span class="inlinecode">(<span class="id" title="var">_</span></span> <span class="inlinecode">×</span> <span class="inlinecode"><span class="id" title="var">_</span>)</span>, <span class="inlinecode">(<span class="id" title="var">_</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" title="var">_</span>)</span>
+    and <span class="inlinecode">(<span class="id" title="var">_</span></span> <span class="inlinecode">/</span> <span class="inlinecode"><span class="id" title="var">_</span>)</span> <i><span class="inlinecode"><span class="id" title="keyword">Search</span></span> patterns</i>.
+    We will soon see how to write more sophisticated such patterns. 
+<div class="paragraph"> </div>
+
+ Alternatively, we can use strings (more about this later): 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "+" "*" "/".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+If we're interested in the name of the function or predicate associated to
+    a given notation, we can use the <span class="inlinecode"><span class="id" title="keyword">Locate</span></span> command which shows how Coq
+    currently interprets a given notation: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Locate</span> "_ + _".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+That's unexpected, we actually have 2 different meanings for <span class="inlinecode">&quot;+&quot;</span>!
+
+<div class="paragraph"> </div>
+
+    As a side note, the <span class="inlinecode">&quot;+&quot;</span> operator between types is the disjoint union. It's
+    fine if you don't know what this means, our only concern here is that it
+    exists. 
+
+<div class="paragraph"> </div>
+
+    Now, how does Coq choose between them? What is the current interpretation
+    of <span class="inlinecode">&quot;+&quot;</span>?. 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Check</span> 2 <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 3. <span class="id" title="var">Fail</span> <span class="id" title="keyword">Check</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a>. 
+<br/>
+</div>
+
+<div class="doc">
+Actually, we could have guessed it with the output of <span class="inlinecode"><span class="id" title="keyword">Locate</span></span>: the default
+    interpretation for "+", without curly braces on the sides is
+    <span class="inlinecode"><span class="id" title="var">Init.Nat.add</span></span>.
+
+<div class="paragraph"> </div>
+
+    Another way to get this information is to use the <span class="inlinecode"><span class="id" title="keyword">About</span></span> command: 
+</div>
+<div class="code">
+<span class="id" title="keyword">About</span> "_ + _".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We have seen that Coq allows to use the same notation in different context.
+    In fact, there are many other uses of "+" in the standard library, it could
+    be the addition between rational numbers, real numbers, ...
+
+<div class="paragraph"> </div>
+
+    The interpretation context for a notation is called a <i>notation scope</i>.
+    When a notation is ambiguous, because it belongs to more than one scope,
+    its default interpretation is the one in the last opened scope.
+
+<div class="paragraph"> </div>
+
+    We can display open scopes with the <span class="inlinecode"><span class="id" title="keyword">Print</span></span> <span class="inlinecode"><span class="id" title="var">Visibility</span></span> command, note that
+    the more recently opened scopes (which have a higher priority) appear last.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="var">Visibility</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Here, the last scope is <span class="inlinecode"><span class="id" title="var">nat_scope</span></span>, we see all the notations associated
+    to it: order relations (<span class="inlinecode">≤</span>, <span class="inlinecode">&lt;</span>, ...) and operations (<span class="inlinecode">+</span>, <span class="inlinecode">×</span>, ...).
+
+<div class="paragraph"> </div>
+
+    If we want to use <span class="inlinecode">+</span> with its interpretation in <span class="inlinecode"><span class="id" title="var">type_scope</span></span>, without
+    changing the opened scope order, we can do so with a scope delimiting key:
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Check</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#e03f39daf98516fa530d3f6f5a1b4d92"><span class="id" title="notation">+</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a>)%<span class="id" title="keyword">type</span>.<br/>
+<span class="id" title="keyword">About</span> "_ + _"<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#sum"><span class="id" title="inductive">%</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#sum"><span class="id" title="inductive">type</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Scope delimiting keys are abbreviations of scope names, usually obtained by
+    removing the <span class="inlinecode"><span class="id" title="var">_scope</span></span> suffix.
+
+<div class="paragraph"> </div>
+
+    One can see the delimiting key associated to a scope name with the
+    <span class="inlinecode"><span class="id" title="keyword">Print</span></span> <span class="inlinecode"><span class="id" title="keyword">Scope</span></span> command. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Print</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">nat_scope</span>.<br/>
+<span class="id" title="keyword">Check</span> (2 <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 3)%<span class="id" title="var">nat</span>. <span class="id" title="keyword">Print</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">type_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can (and should) use delimiting keys in <span class="inlinecode"><span class="id" title="keyword">Search</span></span> <span class="inlinecode"><span class="id" title="var">queries</span></span> with patterns
+    and notation strings:
+
+<div class="paragraph"> </div>
+
+    For instance, if we want to know lemmas about product types, we can write a
+    <span class="inlinecode"><span class="id" title="keyword">type</span></span> key: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>)%<span class="id" title="keyword">type</span>.<br/>
+<span class="id" title="keyword">Search</span> "*"%<span class="id" title="keyword">type</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The following query do not depend on the scopes order: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span>)%<span class="id" title="var">nat</span>.<br/>
+<span class="id" title="keyword">Search</span> "+"%<span class="id" title="var">nat</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>)%<span class="id" title="var">nat</span> "/"%<span class="id" title="var">nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We have used <span class="inlinecode"><span class="id" title="keyword">Search</span></span> patterns with binary operators, similarly, we can
+    search about a unary prefix operator, such as <span class="inlinecode">¬</span> (the negation), with: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#63a68285c81db8f9bc456233bb9ed181"><span class="id" title="notation">¬</span></a> <span class="id" title="var">_</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+In that case it was not necessary to write explicitly the <span class="inlinecode"><span class="id" title="keyword">type</span></span> key, since
+    the <span class="inlinecode">¬</span> notation does not belong to scope <span class="inlinecode"><span class="id" title="var">nat_scope</span></span>.
+    In fact, the <span class="inlinecode">¬</span> currently has only one interpretation. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Locate</span> "~ _".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Now, let's search for lemmas about distributivity of multiplication over
+    addition on <span class="inlinecode"><span class="id" title="var">nat</span></span>.
+    To do so, we can first search all lemmas where the type <span class="inlinecode"><span class="id" title="var">nat</span></span> and the
+    operators (_ * _) and (_ + _) occur. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span>) (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>). 
+<br/>
+</div>
+
+<div class="doc">
+Since our current scope is <span class="inlinecode"><span class="id" title="var">nat</span></span>, the first search item is useless.
+    We can ask for distributivity lemmas, these contain the string "distr" in
+    their names. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span>) (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>) "distr".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab10"></a><h4 class="section">1.2.1 Exercise: sum and products on <span class="inlinecode"><span class="id" title="var">nat</span></span> and <span class="inlinecode"><span class="id" title="keyword">Type</span></span></h4>
+
+<div class="paragraph"> </div>
+
+ Write <span class="inlinecode"><span class="id" title="keyword">Search</span></span> commands with notations to find out if:
+    1. there are operations whose return type is a product type containing <span class="inlinecode"><span class="id" title="var">nat</span></span>;
+    2. there are lemmas involving <span class="inlinecode"><span class="id" title="var">nat</span></span> and a sum type;
+    3. there are inequalities (predicate <span class="inlinecode">≤</span>) on <span class="inlinecode"><span class="id" title="var">nat</span></span> stating that a sum is
+       less than or equal to a product. 
+</div>
+<div class="code">
+
+<br/>
+ <span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>)%<span class="id" title="keyword">type</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+ <span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#e03f39daf98516fa530d3f6f5a1b4d92"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span>)%<span class="id" title="keyword">type</span>.<br/>
+ <span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a3"><span class="id" title="notation">≤</span></a> <span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>)%<span class="id" title="var">nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab11"></a><h3 class="section">1.3 Searching using metavariables</h3>
+
+<div class="paragraph"> </div>
+
+ We have cheated a little bit. It often happens that we have no idea how
+    a lemma is named. However, we know what distributivity (say, on the left)
+    is. We can use a more precise pattern instead of (_ * _). 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">×</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">(</span></a><span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span><a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="var">_</span>). 
+<br/>
+</div>
+
+<div class="doc">
+What about the commutativity of <span class="inlinecode"><span class="id" title="var">Nat.add</span></span>? 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The list is somewhat manageable (and, by sheer luck, <span class="inlinecode"><span class="id" title="var">Nat.add_comm</span></span> appears
+    first), but we can be much more precise with meta-variables. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (?<span class="id" title="var">a</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> ?<span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> ?<span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> ?<span class="id" title="var">a</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can even search for all commutativity lemmas: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (?<span class="id" title="var">op</span> ?<span class="id" title="var">a</span> ?<span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> ?<span class="id" title="var">op</span> ?<span class="id" title="var">b</span> ?<span class="id" title="var">a</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+If we want to exclude the <span class="inlinecode"><span class="id" title="var">bool</span></span> commutativity lemmas, we can, as before
+    add the restriction that we want <span class="inlinecode"><span class="id" title="var">nat</span></span> to be involved: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> (?<span class="id" title="var">op</span> ?<span class="id" title="var">a</span> ?<span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> ?<span class="id" title="var">op</span> ?<span class="id" title="var">b</span> ?<span class="id" title="var">a</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Another possibility is to exclude any results mentioning <span class="inlinecode"><span class="id" title="var">bool</span></span>: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (?<span class="id" title="var">op</span> ?<span class="id" title="var">a</span> ?<span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> ?<span class="id" title="var">op</span> ?<span class="id" title="var">b</span> ?<span class="id" title="var">a</span>) -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can also opt to remove only results with "orb" it its name: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (?<span class="id" title="var">op</span> ?<span class="id" title="var">a</span> ?<span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> ?<span class="id" title="var">op</span> ?<span class="id" title="var">b</span> ?<span class="id" title="var">a</span>) -"orb".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Or results where the (_ || _) operator appears (notice the scope key, since
+    <span class="inlinecode"><span class="id" title="var">bool_scope</span></span> is not currently opened): 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (?<span class="id" title="var">op</span> ?<span class="id" title="var">a</span> ?<span class="id" title="var">b</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> ?<span class="id" title="var">op</span> ?<span class="id" title="var">b</span> ?<span class="id" title="var">a</span>) -(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#081ff67d3116402bb680e8692aa39185"><span class="id" title="notation">||</span></a> <span class="id" title="var">_</span>)%<span class="id" title="var">bool</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab12"></a><h4 class="section">1.3.1 Exercise: find lemmas with metavariables</h4>
+
+<div class="paragraph"> </div>
+
+ Write <span class="inlinecode"><span class="id" title="keyword">Search</span></span> commands with notations and metavariables to find out:
+    1. a lemma stating that adding a natural number on the right cannot be
+       decreasing;
+    2. left distributivity lemmas (without using "distr") between any two
+       operations and
+    3. a lemma saying that a divisor (relation <span class="inlinecode"><span class="id" title="var">Nat.divide</span></span>) is less than or
+       equal to the number it divides (does it have conditions?)
+
+</div>
+<div class="code">
+ <span class="id" title="keyword">Search</span> (?<span class="id" title="var">a</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a3"><span class="id" title="notation">≤</span></a> ?<span class="id" title="var">a</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span>).<br/>
+ <span class="id" title="keyword">Search</span> (?<span class="id" title="var">op1</span> ?<span class="id" title="var">a</span> (?<span class="id" title="var">op2</span> ?<span class="id" title="var">b</span> ?<span class="id" title="var">c</span>) <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> ?<span class="id" title="var">op2</span> (?<span class="id" title="var">op1</span> ?<span class="id" title="var">a</span> ?<span class="id" title="var">b</span>) (?<span class="id" title="var">op1</span> ?<span class="id" title="var">a</span> ?<span class="id" title="var">c</span>)).<br/>
+ <span class="id" title="keyword">Search</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.divide"><span class="id" title="definition">Nat.divide</span></a> ?<span class="id" title="var">a</span> ?<span class="id" title="var">b</span><a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#::type_scope:x_'-&gt;'_x"><span class="id" title="notation">→</span></a> ?<span class="id" title="var">a</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a3"><span class="id" title="notation">≤</span></a> ?<span class="id" title="var">b</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab13"></a><h3 class="section">1.4 Filtering on hypotheses (parameters) or conclusions (return type)</h3>
+
+<div class="paragraph"> </div>
+
+ It often happens that we <span class="inlinecode"><span class="id" title="keyword">Search</span></span> in the middle of a proof for a lemma we
+    suspect will apply to the current goal. In that case, we can use
+    the <span class="inlinecode"><span class="id" title="var">concl</span>:</span> specifier to restrict the <span class="inlinecode"><span class="id" title="keyword">Search</span></span> output to results where
+    a pattern (or notation) appears in the conclusion (a.k.a. return type). 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">concl</span>:(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a3"><span class="id" title="notation">≤</span></a> <span class="id" title="var">_</span>).<br/>
+<span class="id" title="keyword">Search</span> <span class="id" title="var">concl</span>:"||".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Of course, the <span class="inlinecode"><span class="id" title="var">hyp</span>:</span> specifier also exists to <span class="inlinecode"><span class="id" title="keyword">Search</span></span> for a pattern or
+    notation occurring in one of the hypotheses (a.k.a. parameters): 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">hyp</span>:(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a3"><span class="id" title="notation">≤</span></a> <span class="id" title="var">_</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can be even more precise and specify that our pattern (or notation)
+    should appear at the head of the conclusion (or an hypothesis), that is,
+    the whole term should match our pattern, instead of a subterm.
+
+<div class="paragraph"> </div>
+
+    As an example, let us <span class="inlinecode"><span class="id" title="keyword">Search</span></span> for lemmas about conjunctions and
+    disjunctions.
+    We want lemmas whose conclusion is a conjunction.
+    We exclude <span class="inlinecode"><span class="id" title="var">nat</span></span> in order to get only purely logical properties. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e25"><span class="id" title="notation">∨</span></a> <span class="id" title="var">_</span>) <span class="id" title="var">concl</span>:(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <span class="id" title="var">_</span>) -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Notice that, in <span class="inlinecode"><span class="id" title="var">Decidable.not_iff</span></span> and <span class="inlinecode"><span class="id" title="var">bool_choice</span></span>, the conclusion
+    <i>contains</i> a conjunction but is not a conjunction. We can exclude them
+    with the <span class="inlinecode"><span class="id" title="var">headconcl</span></span> specifier: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#f031fe1957c4a4a8e217aa46af2b4e25"><span class="id" title="notation">∨</span></a> <span class="id" title="var">_</span>) <span class="id" title="var">headconcl</span>:(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">∧</span></a> <span class="id" title="var">_</span>) -<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The equivalence <span class="inlinecode"><span class="id" title="var">Decidable.not_or_iff</span></span> has also disappeared, because
+    it is actually treated as a lemma having a single conclusion of the form
+    <span class="inlinecode">(<span class="id" title="var">_</span></span> <span class="inlinecode">↔</span> <span class="inlinecode"><span class="id" title="var">_</span>)</span>, hence not of the form <span class="inlinecode">(<span class="id" title="var">_</span></span> <span class="inlinecode">∧</span> <span class="inlinecode"><span class="id" title="var">_</span>)</span>. 
+<div class="paragraph"> </div>
+
+ We can list all lemmas about addition with an equivalence as a conclusion: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "+" <span class="id" title="var">headconcl</span>:"&lt;-&gt;".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+and all lemmas having an equivalence as a hypothesis. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">headhyp</span>:"&lt;-&gt;".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Finally the <span class="inlinecode"><span class="id" title="var">head</span></span> keyword is just a shorthand for <span class="inlinecode"><span class="id" title="var">headconcl</span></span> or
+    <span class="inlinecode"><span class="id" title="var">headhyp</span></span>: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">head</span>:"&lt;-&gt;".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab14"></a><h4 class="section">1.4.1 Exercise: finding divisibility results</h4>
+
+<div class="paragraph"> </div>
+
+ Write <span class="inlinecode"><span class="id" title="keyword">Search</span></span> commands with filters on hypotheses and/or conclusions in
+    order to:
+    1. find (again) a lemma saying that divisors of an natural number are less
+       than or equal to this number;
+    2. what can be said when a natural number divides a product and
+    3. all results whose goals are exactly divisibility statements.
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">concl</span>:(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#cb53cf0ee22c036a03b4a9281c68b5a3"><span class="id" title="notation">≤</span></a> <span class="id" title="var">_</span>) <span class="id" title="var">hyp</span>:<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.divide"><span class="id" title="definition">Nat.divide</span></a>.<br/>
+<span class="id" title="keyword">Search</span> <span class="id" title="var">hyp</span>:(<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.divide"><span class="id" title="definition">Nat.divide</span></a> <span class="id" title="var">_</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#ea2ff3d561159081cea6fb2e8113cc54"><span class="id" title="notation">×</span></a> <span class="id" title="var">_</span>)).<br/>
+<span class="id" title="keyword">Search</span> <span class="id" title="var">headconcl</span>:<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.divide"><span class="id" title="definition">Nat.divide</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab15"></a><h2 class="section">2. Advanced <span class="inlinecode"><span class="id" title="keyword">Search</span></span> options</h2>
+
+<div class="paragraph"> </div>
+
+<a id="lab16"></a><h3 class="section">2.1 Disambiguating strings in Search queries</h3>
+
+<div class="paragraph"> </div>
+
+ We have seen two different usages of strings in search queries, namely,
+    searching for constants whose name contains the string, such as: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "comm".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+or, search for constants whose type contain a notation, such as: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "||".<br/>
+<span class="id" title="keyword">Search</span> "+".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+So, what really happens here?
+    First, Coq makes a different between identifier (name) characters and
+    other characters.
+    The characters '|' and '+' cannot be used in constant names, so Coq guesses
+    it should interpret "||" and "+" as notations to appear in the types, not as
+    substrings of names.
+
+<div class="paragraph"> </div>
+
+    What happens when a notation uses only identifier characters?
+    This is the case for the <span class="inlinecode"><span class="id" title="var">mod</span></span> operator: 
+</div>
+<div class="code">
+<span class="id" title="keyword">About</span> "mod".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Searching for "mod" lists constants whose identifiers contain "mod", as
+    is indicated in the <span class="inlinecode"><span class="id" title="var">divmod</span></span> operation here: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "mod".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+To <span class="inlinecode"><span class="id" title="keyword">Search</span></span> for constants where the notation <span class="inlinecode"><span class="id" title="var">mod</span></span> appears in the type, we
+    have two solutions: either we enclose the string with single quotes: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "'mod'".<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+or we give an explicit scope key (hence it must be a notation): 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "mod"%<span class="id" title="var">nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Of course, we can still use a pattern instead of a string: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> (<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#::nat_scope:x_'mod'_x"><span class="id" title="notation">mod</span></a> <span class="id" title="var">_</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a id="lab17"></a><h3 class="section">2.2 Filtering results by logical kind and disjunctions of criteria.</h3>
+
+<div class="paragraph"> </div>
+
+ We can also <span class="inlinecode"><span class="id" title="keyword">Search</span></span> for a constant defined with a specific keyword.
+    For instance, the following lists all <span class="inlinecode"><span class="id" title="keyword">Lemma</span></span>s whose names contain "add"
+    and types contain <span class="inlinecode">0</span>: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "add" 0 <span class="id" title="keyword">is</span>:<span class="id" title="keyword">Lemma</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Same for constants defined with the <span class="inlinecode"><span class="id" title="keyword">Theorem</span></span> keyword: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "add" 0 <span class="id" title="keyword">is</span>:<span class="id" title="keyword">Theorem</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Now, if we want both <span class="inlinecode"><span class="id" title="keyword">Lemma</span></span>s and <span class="inlinecode"><span class="id" title="keyword">Theorem</span></span>s we can use the general
+    "or" construct in <span class="inlinecode"><span class="id" title="keyword">Search</span></span> queries: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "add" 0 [<span class="id" title="keyword">is</span>:<span class="id" title="keyword">Theorem</span> | <span class="id" title="keyword">is</span>:<span class="id" title="keyword">Lemma</span>].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The following lists lemmas and theorems about <span class="inlinecode"><span class="id" title="var">Nat.add</span></span> or <span class="inlinecode"><span class="id" title="var">Nat.mul</span></span>
+    containing the strings "comm" or "assoc": 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> [<a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.add"><span class="id" title="definition">Nat.add</span></a> | <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Arith.PeanoNat.html#Nat.mul"><span class="id" title="definition">Nat.mul</span></a>] ["comm" | "assoc"] [<span class="id" title="keyword">is</span>:<span class="id" title="keyword">Lemma</span> | <span class="id" title="keyword">is</span>:<span class="id" title="keyword">Theorem</span>].<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The interested reader can refer to
+    <span class="inlinecode"><span class="id" title="var">the</span></span> <span class="inlinecode"><span class="id" title="var">reference</span></span> <span class="inlinecode"><span class="id" title="var">manual</span></span>(https://coq.inria.fr/doc/V8.19.0/refman/proof-engine/vernacular-commands.html?highlight=searchsearch-by-keyword)
+    for the list of all logical kinds which can appear after [is:]. 
+<div class="paragraph"> </div>
+
+<a id="lab18"></a><h3 class="section">2.3 Searching inside or outside a specific module</h3>
+
+<div class="paragraph"> </div>
+
+ Finally it is possible to further restrict the <span class="inlinecode"><span class="id" title="keyword">Search</span></span> results inside or
+    outside a specific <span class="inlinecode"><span class="id" title="keyword">Module</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">concl</span>:"+" <span class="id" title="var">concl</span>:"*" <span class="id" title="var">headconcl</span>:(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#::nat_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <span class="id" title="var">_</span>) <span class="id" title="var">inside</span> <span class="id" title="var">Nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" title="tactic">in</span></span> keyword is a shorthand for <span class="inlinecode"><span class="id" title="var">inside</span></span>: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">concl</span>:"+" <span class="id" title="var">concl</span>:"*" <span class="id" title="var">headconcl</span>:(<span class="id" title="var">_</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#::nat_scope:x_'&lt;'_x"><span class="id" title="notation">&lt;</span></a> <span class="id" title="var">_</span>) <span class="id" title="tactic">in</span> <span class="id" title="var">Nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" title="var">outside</span></span> keyword on the contrary excludes results from a specific
+    <span class="inlinecode"><span class="id" title="keyword">Module</span></span>. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> "+" <span class="id" title="var">outside</span> <span class="id" title="var">Nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Now, these last <span class="inlinecode"><span class="id" title="keyword">Search</span></span>es exhibit a subtlety related to the <span class="inlinecode"><span class="id" title="keyword">Module</span></span>
+    System. Actually, there are two modules named <span class="inlinecode"><span class="id" title="var">Nat</span></span> in our environment. 
+<div class="paragraph"> </div>
+
+ The first to appear is the last to be <span class="inlinecode"><span class="id" title="keyword">Require</span></span>d. In our case, its full
+    name is <span class="inlinecode"><span class="id" title="var">Coq.Arith.PeanoNat.Nat</span></span>: 
+</div>
+<div class="code">
+<span class="id" title="keyword">About</span> <span class="id" title="var">Nat</span>.<br/>
+<span class="id" title="keyword">Print</span> <span class="id" title="keyword">Module</span> <span class="id" title="var">Nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+But this <span class="inlinecode"><span class="id" title="var">Nat</span></span> module shadows the <span class="inlinecode"><span class="id" title="var">Nat</span></span> module which already exists in
+    <span class="inlinecode"><span class="id" title="var">Init</span></span> (actually, as a side note, the <span class="inlinecode"><span class="id" title="var">Coq.Init.Nat</span></span> module is <span class="inlinecode"><span class="id" title="keyword">Include</span></span>d
+    in <span class="inlinecode"><span class="id" title="var">Coq.Arith.PeanoNat.Nat</span></span>, but this is not relevant in this tutorial). 
+<div class="paragraph"> </div>
+
+ If one wants to <span class="inlinecode"><span class="id" title="keyword">Search</span></span> for all lemmas in the <span class="inlinecode"><span class="id" title="var">Nat</span></span> module taken from
+    <span class="inlinecode"><span class="id" title="var">Init</span></span>, it suffices to qualify it more to disambiguate it: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Search</span> <span class="id" title="var">_</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Init.Nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can even shadow <span class="inlinecode"><span class="id" title="var">PeanoNat.Nat</span></span> module in this file: 
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <a id="Nat" class="idref" href="#Nat"><span class="id" title="module">Nat</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a id="Nat.foo" class="idref" href="#Nat.foo"><span class="id" title="lemma">foo</span></a> : 21 <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> 21 <a class="idref" href="http://coq.inria.fr/distrib/V8.18.0/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 42. <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="SearchTutorial.html#Nat"><span class="id" title="module">Nat</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Search</span> <span class="id" title="var">_</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Nat</span>.<br/>
+<span class="id" title="keyword">Search</span> "f" "o" <span class="id" title="tactic">in</span> <span class="id" title="var">PeanoNat.Nat</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The take-home message here is that modules are often used to provide
+    namespace facilities, so when using <span class="inlinecode"><span class="id" title="var">inside</span></span> and <span class="inlinecode"><span class="id" title="var">outside</span></span>, one should
+    often qualify them more. 
+</div>
+<div class="code">
+</div>
+
+</div>
+</div>
+<script src="./download-session.js"></script>
+</body>
+</html>
